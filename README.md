@@ -72,6 +72,43 @@ pip install -r requirements.txt
 Place the dataset pickle at `data/processed/ogw_data.pkl` — see
 [`data/README.md`](data/README.md) for the exact expected format.
 
+## Pre-trained checkpoints
+
+The trained checkpoints used to produce every number in the paper are archived
+on Zenodo:
+
+**https://doi.org/10.5281/zenodo.22639832**
+
+Download and extract them into the root of this repository:
+
+```bash
+wget https://zenodo.org/records/22639832/files/wavegraphnet-checkpoints.tar.gz
+tar xzf wavegraphnet-checkpoints.tar.gz
+```
+
+This creates `checkpoints/<split>/`, containing 18 files — the inverse branch and
+the forward branch, for each of the 3 splits (`A`, `B`, `B2`) and each of the
+3 seeds (`0`, `1`, `42`):
+
+```
+checkpoints/A/WaveGraphNet__DeltaE_Only_Inverse_seed0.pt
+checkpoints/A/WaveGraphNet__Forward_seed0.pt
+...
+```
+
+With these in place you can reproduce the reported results **without retraining** —
+skip straight to the evaluation commands below. For example:
+
+```bash
+python evaluate_refinement.py --split A --seeds 0 1 42
+```
+
+should print a standalone MAE of `127.1mm`, a refined MAE of `40.8mm`, and a
+false-positive rate of `0.0%`.
+
+Note that evaluation still requires the dataset (`data/processed/ogw_data.pkl`);
+the checkpoints only remove the need to train.
+
 ## Splits: paper name -> code
 
 | Paper name | `--split` value | What it tests |
@@ -123,7 +160,8 @@ exists. Replace `--split A` with `B` or `B2` to reproduce the other splits.
 ### 1. WaveGraphNet (proposed method)
 
 Train the two branches independently — order does not matter, they share
-no gradients:
+no gradients (skip this step if you downloaded the pre-trained checkpoints
+above):
 
 ```bash
 for seed in 0 1 42; do
